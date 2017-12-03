@@ -2,6 +2,8 @@
 
 class Atm
   NOMINALS = [1, 2, 5, 10, 25, 50].freeze
+  NOMINALS_S = NOMINALS.map(&:to_s).freeze
+
   attr_reader :state
   def initialize(state = {})
     validate_hash!(state)
@@ -11,7 +13,7 @@ class Atm
   def load_money(hash = {})
     validate_hash!(hash)
     hash.each do |nominal, value|
-      state[nominal] = state.fetch(nominal, 0) + value
+      state[nominal.to_i] = state.fetch(nominal, 0) + value
     end
     self
   end
@@ -53,7 +55,7 @@ class Atm
 
   def raise_withdraw_error!(amount)
     error_msg = <<ERROR
-  Can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}
+can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}
 ERROR
     raise ArgumentError, error_msg
   end
@@ -84,9 +86,9 @@ ERROR
   end
 
   def validate_nominals!(hash)
-    return if hash.keys.all? { |k| NOMINALS.include?(k) }
+    return if hash.keys.all? { |k| NOMINALS.include?(k.to_i) }
     error_msg = <<ERROR
-  Only nominals: #{NOMINALS.join(', ')} allowed; received: #{hash.keys.join(', ')}
+only nominals: #{NOMINALS.join(', ')} allowed; received: #{hash.keys.join(', ')}
 ERROR
     raise ArgumentError, error_msg
   end

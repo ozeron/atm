@@ -59,7 +59,7 @@ describe Atm do
     context 'with nominal 2 50 papers' do
       let(:hash) { { 50 => 2 } }
 
-      it 'change max_withdraw by 100' do
+      it 'change max_withdraw by loaded' do
         expect { atm.load_money(hash) }.to change { atm.max_withdraw }.by(100)
       end
     end
@@ -77,6 +77,23 @@ describe Atm do
 
       it 'raise ArgumentError error' do
         expect { atm.load_money(hash) }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with string keys' do
+      let(:hash) { { '50' => 3 } }
+
+      it 'change max_withdraw by loaded' do
+        expect { atm.load_money(hash) }.to change { atm.max_withdraw }.by(150)
+      end
+    end
+
+    context 'when complex load' do
+      let(:hash) { { 50 => 1, 25 => 1, 10 => 1, 2 => 2, 1 => 1 } }
+      let(:amount) { 90 }
+
+      it 'change max_withdraw by loaded' do
+        expect { atm.load_money(hash) }.to change { atm.max_withdraw }.by(amount)
       end
     end
   end
