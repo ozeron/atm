@@ -1,26 +1,30 @@
+# frozen_string_literal: true
+
 require 'grape'
 require_relative '../atm'
 require_relative '../middleware/storage'
 
-class Atm
-  class API < Grape::API
-    prefix :api
+module API
+  class Atm < Grape::API
+    ENV_KEY = 'storage.state'
+
+    prefix :atm
     format :json
 
     helpers do
       def stored_config
-        return {} unless env.key?(Middleware::Storage::ENV_KEY)
-        env.fetch(Middleware::Storage::ENV_KEY)
+        return {} unless env.key?(ENV_KEY)
+        env.fetch(ENV_KEY)
       end
 
       def atm
-        @atm ||= Atm.new(stored_config)
+        @atm ||= ::Atm.new(stored_config)
       end
     end
 
     after do
-      next if env[Middleware::Storage::ENV_KEY].blank?
-      env[Middleware::Storage::ENV_KEY] = atm.to_h
+      next if env[ENV_KEY].blank?
+      env[ENV_KEY] = atm.to_h
     end
 
     desc 'return max possible withdraw amount'
@@ -30,10 +34,10 @@ class Atm
 
     desc 'load money to atm'
     params do
-      Atm::NOMINALS_S.each do |nominal|
+      ::Atm::NOMINALS_S.each do |nominal|
         optional nominal, type: Integer, values: ->(v) { v >= 0 }
       end
-      at_least_one_of(*Atm::NOMINALS_S)
+      at_least_one_of(*::Atm::NOMINALS_S)
     end
     post :load do
       begin
@@ -45,7 +49,6 @@ class Atm
         { error: e.message }
       end
     end
-
 
     desc 'withdraw and return money amount'
     params do

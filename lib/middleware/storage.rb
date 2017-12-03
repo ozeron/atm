@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Middleware
   class Storage
     ENV_KEY = 'storage.state'

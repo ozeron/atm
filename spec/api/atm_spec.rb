@@ -1,18 +1,18 @@
 require 'spec_helper'
-require 'atm/api'
+require 'api/atm'
 
-describe Atm::API do
+describe API::Atm do
   include Rack::Test::Methods
 
   def app
     described_class
   end
 
-  describe 'GET /api/max_withdraw' do
+  describe 'GET /atm/max_withdraw' do
     let(:result) { { 'amount' => 0 } }
 
     before do
-      get 'api/max_withdraw'
+      get 'atm/max_withdraw'
     end
 
     it { expect(last_response.status).to eq(200) }
@@ -21,7 +21,7 @@ describe Atm::API do
     end
   end
 
-  describe 'POST /api/load' do
+  describe 'POST /atm/load' do
     # define in let blocks
     # @param err_regexp [Regex]
     # @param params [Hash]
@@ -40,7 +40,7 @@ describe Atm::API do
 
     context 'when ok' do
       before do
-        post '/api/load', '50' => 10
+        post '/atm/load', '50' => 10
       end
 
       it { expect(last_response.status).to eq(200) }
@@ -50,29 +50,29 @@ describe Atm::API do
       let(:params) { { 10 => 5, 13 => 10 } }
       let(:err_regexp) { /only nominals.*?allowed;/ }
 
-      include_examples 'failed_request', '/api/load'
+      include_examples 'failed_request', '/atm/load'
     end
 
     context 'when no nominal received' do
       let(:params) { {} }
       let(:err_regexp) { /are missing, at least one parameter/ }
 
-      include_examples 'failed_request', '/api/load'
+      include_examples 'failed_request', '/atm/load'
     end
 
     context 'when negative quanity received' do
       let(:params) { { 10 => -50 } }
       let(:err_regexp) { /not have a valid value/ }
 
-      include_examples 'failed_request', '/api/load'
+      include_examples 'failed_request', '/atm/load'
     end
   end
 
 
-  describe 'POST /api/withdraw' do
+  describe 'POST /atm/withdraw' do
     shared_examples 'failed_request' do
       before do
-        post '/api/withdraw', params, env
+        post '/atm/withdraw', params, env
       end
 
       it { expect(last_response.status).to eq(400) }
@@ -93,7 +93,7 @@ describe Atm::API do
       let(:end_state) { { 50 => 1, 10 => 10 } }
 
       it 'change env' do
-        expect { post '/api/withdraw', params, env }.to(
+        expect { post '/atm/withdraw', params, env }.to(
           change { env[Middleware::Storage::ENV_KEY] }.to(end_state)
         )
       end
@@ -104,7 +104,7 @@ describe Atm::API do
       let(:state) { { 50 => 2 } }
 
       before do
-        post '/api/withdraw', params, env
+        post '/atm/withdraw', params, env
       end
 
       it { expect(last_response.status).to eq(200) }
