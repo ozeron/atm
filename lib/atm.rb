@@ -26,15 +26,17 @@ class Atm
     fixed_amount = amount.to_i
     validate_amount!(fixed_amount)
     result = NOMINALS.reverse.each_with_object({}) do |nominal, memo|
-      needed = fixed_amount / nominal
-      will_take = [state.fetch(nominal, 0), needed].min
+      will_take = [state.fetch(nominal, 0), fixed_amount / nominal].min
       next if will_take.zero?
       state[nominal] -= will_take
       memo[nominal] = will_take
       fixed_amount -= nominal * will_take
     end
     return result if fixed_amount.zero?
-    raise ArgumentError, "Can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}"
+    error_msg = <<ERROR
+  Can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}
+ERROR
+    raise ArgumentError, error_msg
   end
 
   private
@@ -67,7 +69,7 @@ class Atm
   def validate_nominals!(hash)
     return if hash.keys.all? { |k| NOMINALS.include?(k) }
     error_msg = <<ERROR
-Only nominals: #{NOMINALS.join(', ')} allowed; received: #{hash.keys.join(', ')}
+  Only nominals: #{NOMINALS.join(', ')} allowed; received: #{hash.keys.join(', ')}
 ERROR
     raise ArgumentError, error_msg
   end
