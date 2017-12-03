@@ -1,6 +1,19 @@
 require 'spec_helper'
 require 'atm'
 
+
+shared_examples 'success_withdraw' do
+  it { is_expected.to eq(result) }
+  it { expect { withdraw }.to change { atm.max_withdraw }.by(-1 * amount) }
+end
+
+shared_examples 'failed_withdraw' do
+  it 'return hash with nominals and quanity' do
+    expect { withdraw }.to raise_error(ArgumentError)
+  end
+  it { expect { withdraw rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
+end
+
 describe Atm do
   let(:atm) { described_class.new }
 
@@ -82,28 +95,21 @@ describe Atm do
   end
 
   describe '#withdraw' do
-    subject { atm.withdraw(amount) }
+    subject(:withdraw) { atm.withdraw(amount) }
 
     let(:state) { { 50 => 2 } }
-    let(:atm) { described_class.new(state) }
     let(:amount) { 50 }
     let(:result) { { 50 => 1 } }
+    let(:atm) { described_class.new(state) }
 
-    it 'return hash with nominals and quanity' do
-      is_expected.to eq(result)
-    end
-
-    it 'change max_withdraw by sum withdrawed' do
-      expect { subject }.to change { atm.max_withdraw }.by(-1 * amount)
-    end
+    it_behaves_like 'success_withdraw'
 
     context 'when received like in task' do
       let(:state) { { 50 => 3, 25 => 4 } }
       let(:result) { { 50 => 3, 25 => 2 } }
       let(:amount) { 200 }
 
-      it { is_expected.to eq(result) }
-      it { expect { subject }.to change { atm.max_withdraw }.by(-1 * amount) }
+      include_examples 'success_withdraw'
     end
 
     context 'when amount is complex' do
@@ -111,51 +117,37 @@ describe Atm do
       let(:result) { { 50 => 1, 25 => 1, 10 => 1, 2 => 2, 1 => 1 } }
       let(:amount) { 90 }
 
-      it { is_expected.to eq(result) }
+      include_examples 'success_withdraw'
     end
 
     context 'when amount is bigger than max_withdraw' do
       let(:amount) { 500 }
 
-      it 'raise ArgumentError' do
-        expect { subject }.to raise_error(ArgumentError)
-      end
+      it_behaves_like 'failed_withdraw'
     end
 
     context 'when amount is less than zero' do
       let(:amount) { -50 }
 
-      it 'raise ArgumentError' do
-        expect { subject }.to raise_error(ArgumentError)
-      end
-      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
+      it_behaves_like 'failed_withdraw'
     end
 
     context 'when amount can not be given' do
       let(:amount) { 60 }
 
-      it 'return hash with nominals and quanity' do
-        expect { subject }.to raise_error(ArgumentError)
-      end
-      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
+      it_behaves_like 'failed_withdraw'
     end
 
     context 'when amount can not be converted to int' do
       let(:amount) { 14.3 }
 
-      it 'return hash with nominals and quanity' do
-        expect { subject }.to raise_error(ArgumentError)
-      end
-      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
+      it_behaves_like 'failed_withdraw'
     end
 
     context 'when amount can be converted to int' do
       let(:amount) { 50.0 }
 
-      it 'return hash with nominals and quanity' do
-        is_expected.to eq(result)
-      end
-      it { expect { subject }.to change { atm.max_withdraw }.by(-1 * amount) }
+      it_behaves_like 'success_withdraw'
     end
   end
 end
