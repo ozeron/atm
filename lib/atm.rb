@@ -43,7 +43,7 @@ class Atm
     result.each do |k, v|
       state[k] -= v
       next if state[k] >= 0
-      raise StandardError, 'Nominal quanity can not be less than zero'
+      raise StandardError, 'nominal quanity can not be less than zero'
     end
   end
 
@@ -59,7 +59,7 @@ class Atm
 
   def raise_withdraw_error!(amount)
     error_msg = <<ERROR
-can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}
+can not withdraw sum: #{amount}. have only nominals: #{state.keys.join(', ')}
 ERROR
     raise ArgumentError, error_msg
   end
@@ -76,7 +76,7 @@ ERROR
 
   def validate_amount_less_than_max_withdraw!(amount)
     return if amount < max_withdraw
-    raise ArgumentError, "Can not withdraw this sum. You ask for: #{amount}, max is #{max_withdraw}"
+    raise ArgumentError, "can not withdraw this sum. you ask for: #{amount}, max is #{max_withdraw}"
   end
 
   def validate_hash!(hash)

@@ -1,25 +1,11 @@
 require 'spec_helper'
 require 'atm/api'
-
+require 'byebug'
 describe Atm::API do
   include Rack::Test::Methods
 
   def app
     described_class
-  end
-
-  # define in let blocks
-  # @param err_regexp [Regex]
-  # @param params [Hash]
-  shared_examples 'failed_request' do |url|
-    before do
-      post url, params.to_json, 'CONTENT_TYPE' => 'application/json'
-    end
-
-    it { expect(last_response.status).to eq(400) }
-    it do
-      expect(JSON.parse(last_response.body).fetch('error')).to match(err_regexp)
-    end
   end
 
   describe 'GET /api/max_withdraw' do
@@ -36,6 +22,22 @@ describe Atm::API do
   end
 
   describe 'POST /api/load' do
+    # define in let blocks
+    # @param err_regexp [Regex]
+    # @param params [Hash]
+    shared_examples 'failed_request' do |url|
+      before do
+        env ||= {}
+        env['CONTENT_TYPE'] = 'application/json'
+        post url, params.to_json, env
+      end
+
+      it { expect(last_response.status).to eq(400) }
+      it do
+        expect(JSON.parse(last_response.body).fetch('error')).to match(err_regexp)
+      end
+    end
+
     context 'when ok' do
       before do
         post '/api/load', '50' => 10
@@ -48,22 +50,82 @@ describe Atm::API do
       let(:params) { { 10 => 5, 13 => 10 } }
       let(:err_regexp) { /only nominals.*?allowed;/ }
 
-      it_behaves_like 'failed_request', '/api/load'
+      include_examples 'failed_request', '/api/load'
     end
 
     context 'when no nominal received' do
       let(:params) { {} }
       let(:err_regexp) { /are missing, at least one parameter/ }
 
-      it_behaves_like 'failed_request', '/api/load'
+      include_examples 'failed_request', '/api/load'
     end
 
     context 'when negative quanity received' do
       let(:params) { { 10 => -50 } }
       let(:err_regexp) { /not have a valid value/ }
 
-      it_behaves_like 'failed_request', '/api/load'
+      include_examples 'failed_request', '/api/load'
     end
   end
 
+
+  describe 'POST /api/withdraw' do
+    shared_examples 'failed_request' do
+      before do
+        post '/api/withdraw', params, env
+      end
+
+      it { expect(last_response.status).to eq(400) }
+      it do
+        expect(JSON.parse(last_response.body).fetch('error')).to match(err_regexp)
+      end
+    end
+
+    let(:state) { { 50 => 2 } }
+    let(:env) do
+      { Middleware::Storage::ENV_KEY => state.clone }
+    end
+    let(:params) { { 'amount' => 50 } }
+
+    it 'change env' do
+      expect { post '/api/withdraw', params, env }.to(
+        change { env[Middleware::Storage::ENV_KEY] }
+      )
+    end
+
+    context 'when ok' do
+      let(:result) { { '50' => 1 } }
+
+      before do
+        post '/api/withdraw', params, env
+      end
+
+      it { expect(last_response.status).to eq(200) }
+      it { expect(JSON.parse(last_response.body)).to eq(result) }
+    end
+
+    context 'when amount is bigger then atm has' do
+      let(:params) { { amount: 150 } }
+      let(:err_regexp) { /can not withdraw this sum. you ask for.*?max is/ }
+      let(:state) { { 50 => 2 } }
+
+      include_examples 'failed_request'
+    end
+
+    context 'when amount is negative' do
+      let(:params) { { amount: -10 } }
+      let(:err_regexp) { /amount does not have a valid value/ }
+      let(:state) { { 50 => 2 } }
+
+      include_examples 'failed_request'
+    end
+
+    context 'when atm has wrong nominals' do
+      let(:params) { { amount: 10 } }
+      let(:err_regexp) { /can not withdraw sum.*have only nominals?/ }
+      let(:state) { { 50 => 2, 5 => 1 } }
+
+      include_examples 'failed_request'
+    end
+  end
 end
