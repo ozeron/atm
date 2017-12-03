@@ -95,6 +95,7 @@ describe Atm do
 
     context 'with string keys' do
       let(:hash) { { '50' => 3 } }
+      let(:atm) { described_class.new(50 => 4) }
 
       it 'change max_withdraw by loaded' do
         expect { atm.load_money(hash) }.to change { atm.max_withdraw }.by(150)

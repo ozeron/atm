@@ -17,7 +17,7 @@ class Atm
   def load_money(hash = {})
     validate_hash!(hash)
     hash.each do |nominal, value|
-      state[nominal.to_i] = state.fetch(nominal, 0) + value
+      state[nominal.to_i] = state.fetch(nominal.to_i, 0) + value
     end
     self
   end
