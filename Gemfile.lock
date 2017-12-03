@@ -45,6 +45,8 @@ GEM
     rack (2.0.3)
     rack-accept (0.4.5)
       rack (>= 0.4)
+    rack-health (0.1.2)
+      rack (>= 1.2.0)
     rack-test (0.8.2)
       rack (>= 1.0, < 3)
     rainbow (2.2.2)
@@ -90,6 +92,7 @@ DEPENDENCIES
   grape
   pry
   rack
+  rack-health
   rack-test
   rspec
   rubocop

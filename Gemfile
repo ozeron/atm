@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gem 'grape'
 gem 'rack'
+gem 'rack-health'
 
 group :development do
   gem 'pry'
