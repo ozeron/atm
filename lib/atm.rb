@@ -25,21 +25,38 @@ class Atm
   def withdraw(amount)
     fixed_amount = amount.to_i
     validate_amount!(fixed_amount)
-    result = NOMINALS.reverse.each_with_object({}) do |nominal, memo|
-      will_take = [state.fetch(nominal, 0), fixed_amount / nominal].min
-      next if will_take.zero?
-      state[nominal] -= will_take
-      memo[nominal] = will_take
-      fixed_amount -= nominal * will_take
+    result, change = build_withdraw_hash(fixed_amount)
+    raise_withdraw_error!(amount) if change > 0
+    apply_withdraw(result)
+    result
+  end
+
+  private
+
+  def apply_withdraw(result)
+    result.each do |k, v|
+      state[k] -= v
+      next if state[k] >= 0
+      raise StandardError, 'Nominal quanity can not be less than zero'
     end
-    return result if fixed_amount.zero?
+  end
+
+  def build_withdraw_hash(amount)
+    hash = NOMINALS.reverse.each_with_object({}) do |nominal, memo|
+      will_take = [state.fetch(nominal, 0), amount / nominal].min
+      next if will_take.zero?
+      memo[nominal] = will_take
+      amount -= nominal * will_take
+    end
+    [hash, amount]
+  end
+
+  def raise_withdraw_error!(amount)
     error_msg = <<ERROR
   Can not withdraw sum: #{amount}. Have only nominals: #{state.keys.join(', ')}
 ERROR
     raise ArgumentError, error_msg
   end
-
-  private
 
   def validate_amount!(amount)
     validate_amount_bigger_than_zero!(amount)

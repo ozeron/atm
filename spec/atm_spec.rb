@@ -93,12 +93,17 @@ describe Atm do
       is_expected.to eq(result)
     end
 
+    it 'change max_withdraw by sum withdrawed' do
+      expect { subject }.to change { atm.max_withdraw }.by(-1 * amount)
+    end
+
     context 'when received like in task' do
       let(:state) { { 50 => 3, 25 => 4 } }
       let(:result) { { 50 => 3, 25 => 2 } }
       let(:amount) { 200 }
 
       it { is_expected.to eq(result) }
+      it { expect { subject }.to change { atm.max_withdraw }.by(-1 * amount) }
     end
 
     context 'when amount is complex' do
@@ -123,6 +128,7 @@ describe Atm do
       it 'raise ArgumentError' do
         expect { subject }.to raise_error(ArgumentError)
       end
+      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
     end
 
     context 'when amount can not be given' do
@@ -131,6 +137,7 @@ describe Atm do
       it 'return hash with nominals and quanity' do
         expect { subject }.to raise_error(ArgumentError)
       end
+      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
     end
 
     context 'when amount can not be converted to int' do
@@ -139,6 +146,7 @@ describe Atm do
       it 'return hash with nominals and quanity' do
         expect { subject }.to raise_error(ArgumentError)
       end
+      it { expect { subject rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
     end
 
     context 'when amount can be converted to int' do
@@ -147,6 +155,7 @@ describe Atm do
       it 'return hash with nominals and quanity' do
         is_expected.to eq(result)
       end
+      it { expect { subject }.to change { atm.max_withdraw }.by(-1 * amount) }
     end
   end
 end
