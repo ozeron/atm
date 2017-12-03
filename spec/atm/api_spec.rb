@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'atm/api'
-require 'byebug'
+
 describe Atm::API do
   include Rack::Test::Methods
 
@@ -43,7 +43,7 @@ describe Atm::API do
         post '/api/load', '50' => 10
       end
 
-      it { expect(last_response.status).to eq(201) }
+      it { expect(last_response.status).to eq(200) }
     end
 
     context 'when wrong nominals received' do
@@ -81,20 +81,27 @@ describe Atm::API do
       end
     end
 
-    let(:state) { { 50 => 2 } }
+
     let(:env) do
       { Middleware::Storage::ENV_KEY => state.clone }
     end
     let(:params) { { 'amount' => 50 } }
+    let(:state) { { } }
 
-    it 'change env' do
-      expect { post '/api/withdraw', params, env }.to(
-        change { env[Middleware::Storage::ENV_KEY] }
-      )
+    describe 'mutating env during request' do
+      let(:state) { { 50 =>2, 10 => 10 } }
+      let(:end_state) { { 50 => 1, 10 => 10 } }
+
+      it 'change env' do
+        expect { post '/api/withdraw', params, env }.to(
+          change { env[Middleware::Storage::ENV_KEY] }.to(end_state)
+        )
+      end
     end
 
     context 'when ok' do
       let(:result) { { '50' => 1 } }
+      let(:state) { { 50 => 2 } }
 
       before do
         post '/api/withdraw', params, env

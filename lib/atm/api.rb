@@ -36,6 +36,7 @@ class Atm
     post :load do
       begin
         atm.load_money(params)
+        status 200
         {}
       rescue ArgumentError => e
         status 400
