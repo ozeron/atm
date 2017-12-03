@@ -23,10 +23,12 @@ class Atm
       env[Middleware::Storage::ENV_KEY] = atm.to_h
     end
 
+    desc 'return max possible withdraw amount'
     get :max_withdraw do
       { 'amount' => atm.max_withdraw }
     end
 
+    desc 'load money to atm'
     params do
       Atm::NOMINALS_S.each do |nominal|
         optional nominal, type: Integer, values: ->(v) { v >= 0 }
@@ -44,6 +46,8 @@ class Atm
       end
     end
 
+
+    desc 'withdraw and return money amount'
     params do
       requires :amount, type: Integer, values: ->(v) { v >= 0 }
     end

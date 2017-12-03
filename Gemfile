@@ -2,9 +2,10 @@
 
 source "https://rubygems.org"
 
+gem 'grape-swagger'
 gem 'grape'
-gem 'rack'
 gem 'rack-health'
+gem 'rack'
 
 group :development do
   gem 'pry'

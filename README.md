@@ -1,5 +1,7 @@
 # Simple ATM WEB API
-
+## API Docs
+You can use Swagger via path `/swagger_doc` to check your documentation.
+It is very easy via [Swagger UI](https://github.com/swagger-api/swagger-ui)
 ## Routes
 
 ### GET /api/max_withdraw
