@@ -1,19 +1,6 @@
 require 'spec_helper'
 require 'atm'
 
-
-shared_examples 'success_withdraw' do
-  it { is_expected.to eq(result) }
-  it { expect { withdraw }.to change { atm.max_withdraw }.by(-1 * amount) }
-end
-
-shared_examples 'failed_withdraw' do
-  it 'return hash with nominals and quanity' do
-    expect { withdraw }.to raise_error(ArgumentError)
-  end
-  it { expect { withdraw rescue ArgumentError }.not_to(change { atm.max_withdraw }) }
-end
-
 describe Atm do
   let(:atm) { described_class.new }
 
@@ -97,10 +84,32 @@ describe Atm do
   describe '#withdraw' do
     subject(:withdraw) { atm.withdraw(amount) }
 
+    shared_examples 'success_withdraw' do
+      it { is_expected.to eq(result) }
+      it { expect { withdraw }.to change { atm.max_withdraw }.by(-1 * amount) }
+    end
+
+    shared_examples 'failed_withdraw' do
+      subject(:withdraw_safe) do
+        begin
+          atm.withdraw(amount)
+        rescue ArgumentError => e
+          e.message
+        end
+      end
+
+      it 'return hash with nominals and quanity' do
+        expect { withdraw }.to raise_error(ArgumentError)
+      end
+      it do
+        expect { withdraw_safe }.not_to(change { atm.max_withdraw })
+      end
+    end
+
+    let(:atm) { described_class.new(state) }
     let(:state) { { 50 => 2 } }
     let(:amount) { 50 }
     let(:result) { { 50 => 1 } }
-    let(:atm) { described_class.new(state) }
 
     it_behaves_like 'success_withdraw'
 
