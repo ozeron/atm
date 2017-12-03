@@ -4,6 +4,19 @@ require 'atm'
 describe Atm do
   let(:atm) { described_class.new }
 
+  describe '#to_h' do
+    let(:state) { { 10 => 23, 50 => 20 } }
+    let(:atm) { Atm.new(state) }
+
+    it 'return state' do
+      expect(atm.to_h).to eq(state)
+    end
+
+    it 'mutating of hash do not change atm' do
+      expect { atm.to_h[10] = 5 }.not_to(change { atm.max_withdraw })
+    end
+  end
+
   describe '#max_withdraw' do
     context 'with empty atm' do
       it 'zero' do

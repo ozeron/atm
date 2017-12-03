@@ -10,6 +10,10 @@ class Atm
     @state = state
   end
 
+  def to_h
+    state.clone
+  end
+
   def load_money(hash = {})
     validate_hash!(hash)
     hash.each do |nominal, value|
