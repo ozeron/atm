@@ -77,6 +77,14 @@ describe Atm do
       end
     end
 
+    context 'with float papers' do
+      let(:hash) { { 50 => 0.5 } }
+
+      it 'change max_withdraw by loaded' do
+        expect { atm.load_money(hash) }.to raise_error(ArgumentError)
+      end
+    end
+
     context 'with negative value of papers' do
       let(:hash) { { 50 => -2 } }
 

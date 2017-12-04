@@ -27,7 +27,6 @@ describe API::Atm do
     # @param params [Hash]
     shared_examples 'failed_request' do |url|
       before do
-        env ||= {}
         env['CONTENT_TYPE'] = 'application/json'
         post url, params.to_json, env
       end
@@ -38,12 +37,37 @@ describe API::Atm do
       end
     end
 
+    let(:state) { {} }
+    let(:env) do
+      { Middleware::Storage::ENV_KEY => state.clone }
+    end
+
     context 'when ok' do
       before do
         post '/atm/load', '50' => 10
       end
 
       it { expect(last_response.status).to eq(200) }
+    end
+
+    context 'when float quanity received' do
+      subject(:request) {
+        post '/atm/load', params, env
+      }
+
+      let(:end_state) { { 10 => 3 } }
+      let(:params) { { 10 => 3.99 } }
+
+      it do
+        request
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'store int part' do
+        expect { request }.to(
+          change { env[Middleware::Storage::ENV_KEY] }.to(end_state)
+        )
+      end
     end
 
     context 'when wrong nominals received' do

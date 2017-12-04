@@ -5,6 +5,7 @@ require 'middleware/storage'
 require 'rack-health'
 
 use Rack::Reloader
-use Rack::Health, path: '/healthz'
+use Rack::CommonLogger
 use Middleware::Storage
+use Rack::Health, path: '/healthz'
 run API::Root

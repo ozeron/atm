@@ -82,6 +82,7 @@ ERROR
   def validate_hash!(hash)
     validate_nominal_quanity!(hash)
     validate_nominals!(hash)
+    validate_values!(hash)
   end
 
   def validate_nominal_quanity!(hash)
@@ -93,6 +94,14 @@ ERROR
     return if hash.keys.all? { |k| NOMINALS.include?(k.to_i) }
     error_msg = <<ERROR
 only nominals: #{NOMINALS.join(', ')} allowed; received: #{hash.keys.join(', ')}
+ERROR
+    raise ArgumentError, error_msg
+  end
+
+  def validate_values!(hash)
+    return if hash.values.all? { |i| i.is_a? Integer }
+    error_msg = <<ERROR
+nominal quanity should be integer
 ERROR
     raise ArgumentError, error_msg
   end
