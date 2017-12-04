@@ -66,7 +66,7 @@ ERROR
 
   def validate_amount!(amount)
     validate_amount_bigger_than_zero!(amount)
-    validate_amount_less_than_max_withdraw!(amount)
+    validate_amount_possible_to_withdraw!(amount)
   end
 
   def validate_amount_bigger_than_zero!(amount)
@@ -74,8 +74,8 @@ ERROR
     raise ArgumentError, 'Amount should be positive number'
   end
 
-  def validate_amount_less_than_max_withdraw!(amount)
-    return if amount < max_withdraw
+  def validate_amount_possible_to_withdraw!(amount)
+    return if amount <= max_withdraw
     raise ArgumentError, "can not withdraw this sum. you ask for: #{amount}, max is #{max_withdraw}"
   end
 

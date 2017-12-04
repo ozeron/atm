@@ -198,4 +198,12 @@ describe Atm do
       it_behaves_like 'success_withdraw'
     end
   end
+
+  describe 'put all money, withdraw all' do
+    it 'retutn all' do
+      atm = Atm.new
+      atm.load_money({ 10 => 10})
+      expect(atm.withdraw(100)).to eq({ 10 => 10 })
+    end
+  end
 end
