@@ -6,6 +6,7 @@ gem 'grape-swagger'
 gem 'grape'
 gem 'rack-health'
 gem 'rack'
+gem 'oj'
 
 group :development do
   gem 'pry'

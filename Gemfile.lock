@@ -37,6 +37,7 @@ GEM
     mustermann (1.0.1)
     mustermann-grape (1.0.0)
       mustermann (~> 1.0.0)
+    oj (3.3.9)
     parallel (1.12.0)
     parser (2.4.0.2)
       ast (~> 2.3)
@@ -93,6 +94,7 @@ PLATFORMS
 DEPENDENCIES
   grape
   grape-swagger
+  oj
   pry
   rack
   rack-health
