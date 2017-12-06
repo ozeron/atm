@@ -10,6 +10,8 @@ RUN bundle install
 # Set environment variables.
 ENV PORT 8080
 
+COPY . /app
+
 # Define default command.
 RUN ["/bin/bash"]
 # Expose ports.
